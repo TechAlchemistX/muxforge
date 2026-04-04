@@ -107,8 +107,8 @@ func runRemove(arg string, dryRun bool) error {
 
 	if dryRun {
 		fmt.Printf("[dry-run] would remove: set -g @plugin '%s'\n", target)
-		fmt.Printf("[dry-run] would delete directory: %s\n", p.InstallPath)
-		fmt.Printf("[dry-run] would remove from lock file\n")
+		fmt.Printf("[dry-run] would delete directory %s\n", p.InstallPath)
+		fmt.Printf("[dry-run] would write lock file\n")
 		return nil
 	}
 

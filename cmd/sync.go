@@ -105,11 +105,7 @@ func runSync(dryRun bool) error {
 		lockedEntry := lock.FindPlugin(lf, p.Name)
 
 		if dryRun {
-			if lockedEntry != nil {
-				fmt.Printf("[dry-run] would install %s @ %s (pinned)\n", p.Name, lockedEntry.Commit[:7])
-			} else {
-				fmt.Printf("[dry-run] would install %s (latest)\n", p.Name)
-			}
+			fmt.Printf("[dry-run] would clone %s → %s\n", p.Name, p.InstallPath)
 			continue
 		}
 
@@ -186,7 +182,7 @@ func runSync(dryRun bool) error {
 		}
 
 		if dryRun {
-			fmt.Printf("[dry-run] would reinstall %s @ %s (lock entry, directory missing)\n", lp.Name, lp.Commit[:7])
+			fmt.Printf("[dry-run] would clone %s → %s\n", lp.Name, p.InstallPath)
 			continue
 		}
 
@@ -208,6 +204,7 @@ func runSync(dryRun bool) error {
 	}
 
 	if dryRun {
+		fmt.Println("[dry-run] would write lock file")
 		return nil
 	}
 
