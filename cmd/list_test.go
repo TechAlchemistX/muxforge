@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mandeep/muxforge/internal/config"
-	"github.com/mandeep/muxforge/internal/lock"
+	"github.com/TechAlchemistX/muxforge/internal/config"
+	"github.com/TechAlchemistX/muxforge/internal/lock"
 )
 
 // TestList_StatusIndicators verifies that the data conditions for each of the

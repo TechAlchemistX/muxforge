@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/mandeep/muxforge/internal/config"
-	"github.com/mandeep/muxforge/internal/lock"
-	"github.com/mandeep/muxforge/internal/plugin"
+	"github.com/TechAlchemistX/muxforge/internal/config"
+	"github.com/TechAlchemistX/muxforge/internal/lock"
+	"github.com/TechAlchemistX/muxforge/internal/plugin"
 	"github.com/spf13/cobra"
 )
 

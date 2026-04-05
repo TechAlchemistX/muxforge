@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mandeep/muxforge/internal/config"
-	"github.com/mandeep/muxforge/internal/lock"
+	"github.com/TechAlchemistX/muxforge/internal/config"
+	"github.com/TechAlchemistX/muxforge/internal/lock"
 )
 
 // makeGitRepo creates a minimal git repository in dir with a single commit

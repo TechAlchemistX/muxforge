@@ -1,3 +1,6 @@
+# Internal docs
+docs/
+
 # Build output
 muxforge
 dist/

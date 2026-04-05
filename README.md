@@ -2,8 +2,8 @@
 
 **Reproducible tmux plugin management for engineers who live on servers.**
 
-[![CI](https://github.com/mandeep/muxforge/actions/workflows/ci.yml/badge.svg)](https://github.com/mandeep/muxforge/actions/workflows/ci.yml)
-[![Release](https://github.com/mandeep/muxforge/actions/workflows/release.yml/badge.svg)](https://github.com/mandeep/muxforge/actions/workflows/release.yml)
+[![CI](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml/badge.svg)](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml)
+[![Release](https://github.com/TechAlchemistX/muxforge/actions/workflows/release.yml/badge.svg)](https://github.com/TechAlchemistX/muxforge/actions/workflows/release.yml)
 
 TPM still works. But it has no memory, no lock file, and no concept of reproducibility. muxforge does.
 
@@ -44,7 +44,7 @@ brew install muxforge
 
 **GitHub Releases**
 
-Download the binary for your platform from [releases](https://github.com/mandeep/muxforge/releases) and drop it in your PATH.
+Download the binary for your platform from [releases](https://github.com/TechAlchemistX/muxforge/releases) and drop it in your PATH.
 
 ---
 
@@ -171,7 +171,7 @@ If a plugin works with TPM, it works with muxforge.
 - [ ] AUR package
 - [ ] Nix flake
 
-Have a feature request? [Open an issue.](https://github.com/mandeep/muxforge/issues)
+Have a feature request? [Open an issue.](https://github.com/TechAlchemistX/muxforge/issues)
 
 ---
 
@@ -213,7 +213,7 @@ muxforge is written in Go. Contributions are welcome.
 
 **Setup**
 ```bash
-git clone https://github.com/mandeep/muxforge
+git clone https://github.com/TechAlchemistX/muxforge
 cd muxforge
 go mod download
 go build ./...

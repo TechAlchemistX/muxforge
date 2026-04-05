@@ -1,4 +1,4 @@
-module github.com/mandeep/muxforge
+module github.com/TechAlchemistX/muxforge
 
 go 1.22
 

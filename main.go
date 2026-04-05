@@ -1,6 +1,6 @@
 package main
 
-import "github.com/mandeep/muxforge/cmd"
+import "github.com/TechAlchemistX/muxforge/cmd"
 
 // Build-time variables injected by goreleaser ldflags.
 var (

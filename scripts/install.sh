@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-GITHUB_REPO="mandeep/muxforge"
+GITHUB_REPO="TechAlchemistX/muxforge"
 BINARY_NAME="muxforge"
 INSTALL_DIR="/usr/local/bin"
 VERSION="${VERSION:-latest}"

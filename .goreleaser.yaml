@@ -36,9 +36,9 @@ changelog:
 
 brews:
   - repository:
-      owner: mandeep
+      owner: TechAlchemistX
       name: homebrew-muxforge
-    homepage: https://github.com/mandeep/muxforge
+    homepage: https://github.com/TechAlchemistX/muxforge
     description: A plugin manager and multiplexer forge for developer toolchains
     install: |
       bin.install "muxforge"
