@@ -1,0 +1,13 @@
+# Build output
+muxforge
+dist/
+
+# macOS
+.DS_Store
+
+# Go test cache
+*.test
+*.out
+
+# goreleaser
+.goreleaser-local.yaml

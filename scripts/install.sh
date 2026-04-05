@@ -45,19 +45,23 @@ fi
 
 echo "-> Installing ${BINARY_NAME} ${VERSION} (${OS}/${ARCH})..."
 
-# Build download URL
-DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}/${BINARY_NAME}-${OS}-${ARCH}"
+# Build download URL (goreleaser produces tar.gz archives)
+ARCHIVE_NAME="${BINARY_NAME}-${OS}-${ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}/${ARCHIVE_NAME}"
 
-# Download binary
-TMP_FILE="/tmp/${BINARY_NAME}"
-curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_FILE}"
-chmod +x "${TMP_FILE}"
+# Download and extract
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
+curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_DIR}/${ARCHIVE_NAME}"
+tar -xzf "${TMP_DIR}/${ARCHIVE_NAME}" -C "${TMP_DIR}"
+chmod +x "${TMP_DIR}/${BINARY_NAME}"
 
 # Install binary
 if [ -w "${INSTALL_DIR}" ]; then
-  mv "${TMP_FILE}" "${INSTALL_DIR}/${BINARY_NAME}"
+  mv "${TMP_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 else
-  sudo mv "${TMP_FILE}" "${INSTALL_DIR}/${BINARY_NAME}"
+  sudo mv "${TMP_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 fi
 
 echo "✓ ${BINARY_NAME} installed to ${INSTALL_DIR}/${BINARY_NAME}"
