@@ -2,6 +2,9 @@
 
 **Reproducible tmux plugin management for engineers who live on servers.**
 
+[![CI](https://github.com/mandeep/muxforge/actions/workflows/ci.yml/badge.svg)](https://github.com/mandeep/muxforge/actions/workflows/ci.yml)
+[![Release](https://github.com/mandeep/muxforge/actions/workflows/release.yml/badge.svg)](https://github.com/mandeep/muxforge/actions/workflows/release.yml)
+
 TPM still works. But it has no memory, no lock file, and no concept of reproducibility. muxforge does.
 
 ```bash

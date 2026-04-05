@@ -20,6 +20,7 @@ builds:
 archives:
   - format: tar.gz
     name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+    wrap_in_directory: false
 
 checksum:
   name_template: checksums.txt
