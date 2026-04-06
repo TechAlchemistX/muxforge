@@ -18,7 +18,7 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
 
 archives:
-  - format: tar.gz
+  - formats: [tar.gz]
     name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
     wrap_in_directory: false
 
@@ -38,6 +38,7 @@ brews:
   - repository:
       owner: TechAlchemistX
       name: homebrew-muxforge
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     homepage: https://github.com/TechAlchemistX/muxforge
     description: A plugin manager and multiplexer forge for developer toolchains
     install: |
