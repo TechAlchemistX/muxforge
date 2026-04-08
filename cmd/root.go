@@ -40,13 +40,13 @@ and pins versions via a tmux.lock file for reproducible setups.`,
 
 	root.Flags().BoolVarP(&showVersion, "version", "v", false, "Print version information")
 
-	// Register subcommands (stubs for Phase 1).
 	root.AddCommand(newInstallCmd())
 	root.AddCommand(newRemoveCmd())
 	root.AddCommand(newUpdateCmd())
 	root.AddCommand(newListCmd())
 	root.AddCommand(newSyncCmd())
 	root.AddCommand(newMigrateCmd())
+	root.AddCommand(newLoadCmd())
 
 	return root
 }

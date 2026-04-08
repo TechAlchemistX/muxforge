@@ -220,16 +220,13 @@ func buildMigratedLines(cfg *config.Config, allPlugins []string) ([]string, int)
 		}
 	}
 
-	// Also remove the muxforge bootstrap line for now — we'll re-add it at the end.
-	bootstrapIdx := -1
+	// Remove any muxforge bootstrap line (current or legacy form) — re-added at the end.
 	for i, line := range cfg.Lines {
-		if strings.TrimSpace(line) == config.BootstrapLine {
-			bootstrapIdx = i
+		trimmed := strings.TrimSpace(line)
+		if trimmed == config.BootstrapLine || trimmed == config.BootstrapLineLegacy {
 			removeSet[i] = true
-			break
 		}
 	}
-	_ = bootstrapIdx
 
 	// Determine insert position: position of first removed line, or end.
 	insertAt := len(cfg.Lines)

@@ -67,9 +67,11 @@ func UpdateManagedBlock(cfg *Config, plugins []string) error {
 	cfg.ManagedPlugins = plugins
 
 	// Re-scan for BootstrapLineIndex in case its position changed.
+	// Recognise both the current and legacy bootstrap line forms.
 	cfg.BootstrapLineIndex = -1
 	for i, line := range cfg.Lines {
-		if strings.TrimSpace(line) == BootstrapLine {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == BootstrapLine || trimmed == BootstrapLineLegacy {
 			cfg.BootstrapLineIndex = i
 			break
 		}

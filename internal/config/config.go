@@ -11,8 +11,11 @@ const (
 	BlockStart = "# --- muxforge plugins (managed) ---"
 	// BlockEnd is the marker line that ends the muxforge-managed plugin block.
 	BlockEnd = "# --- end muxforge ---"
-	// BootstrapLine is the line that invokes muxforge from tmux.
-	BootstrapLine = "run 'muxforge'"
+	// BootstrapLine is the line that invokes muxforge's plugin loader from tmux.
+	BootstrapLine = "run 'muxforge load'"
+	// BootstrapLineLegacy is the old bootstrap line used before the load subcommand
+	// was introduced. Detected during parsing for backward compatibility.
+	BootstrapLineLegacy = "run 'muxforge'"
 	// PluginPrefix is the prefix used for plugin declarations in tmux.conf.
 	PluginPrefix = "set -g @plugin '"
 )

@@ -45,7 +45,7 @@ func ParseConfig(path string) (*Config, error) {
 			cfg.ManagedBlockEnd = idx
 			insideBlock = false
 
-		case trimmed == BootstrapLine:
+		case trimmed == BootstrapLine || trimmed == BootstrapLineLegacy:
 			cfg.BootstrapLineIndex = idx
 
 		case strings.HasPrefix(trimmed, PluginPrefix):
