@@ -48,6 +48,26 @@ Download the binary for your platform from [releases](https://github.com/TechAlc
 
 ---
 
+## Uninstall
+
+**curl**
+```bash
+curl -fsSL https://muxforge.dev/uninstall.sh | sh
+```
+
+**Homebrew**
+```bash
+brew uninstall muxforge
+```
+
+The uninstaller removes the binary, strips the muxforge managed block and bootstrap line from your `tmux.conf`, and deletes the lock file. Plugin directories in `~/.tmux/plugins/` are left in place by default — pass `--purge-plugins` to remove them too:
+
+```bash
+curl -fsSL https://muxforge.dev/uninstall.sh | sh -s -- --purge-plugins
+```
+
+---
+
 ## Quick Start
 
 **Fresh setup**
@@ -74,7 +94,7 @@ set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'christoomey/vim-tmux-navigator'
 # --- end muxforge ---
 
-run 'muxforge'
+run 'muxforge load'
 ```
 
 Everything inside the managed block is muxforge's territory. Everything outside is yours. It never touches anything outside that block.
@@ -104,9 +124,7 @@ Already using TPM? One command.
 muxforge migrate
 ```
 
-muxforge will find your existing `@plugin` declarations, move them into the managed block, resolve current versions, and write your lock file. Your plugins stay exactly where they are. Nothing reinstalled.
-
-Remove the old TPM bootstrap line from the bottom of your config and you're done.
+muxforge will find your existing `@plugin` declarations, move them into the managed block, resolve current versions, and write your lock file. Your plugins stay exactly where they are — nothing reinstalled. The TPM bootstrap line and the `~/.tmux/plugins/tpm` directory are removed automatically.
 
 ---
 
