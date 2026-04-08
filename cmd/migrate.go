@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -61,20 +62,21 @@ func runMigrate() error {
 	}
 
 	// Consolidate all plugins: managed first, then legacy, preserving order.
-	// Deduplicate by name (managed takes precedence).
+	// Deduplicate by name (managed takes precedence). Exclude tpm itself — it
+	// is a plugin manager, not a user plugin, and muxforge has replaced it.
 	seen := make(map[string]bool)
 	allPlugins := make([]string, 0, len(cfg.ManagedPlugins)+len(cfg.LegacyPlugins))
 
 	for _, raw := range cfg.ManagedPlugins {
 		name := plugin.NormalizeName(raw)
-		if !seen[name] {
+		if !seen[name] && name != "tmux-plugins/tpm" {
 			seen[name] = true
 			allPlugins = append(allPlugins, name)
 		}
 	}
 	for _, raw := range cfg.LegacyPlugins {
 		name := plugin.NormalizeName(raw)
-		if !seen[name] {
+		if !seen[name] && name != "tmux-plugins/tpm" {
 			seen[name] = true
 			allPlugins = append(allPlugins, name)
 		}
@@ -171,10 +173,28 @@ func runMigrate() error {
 		os.Exit(1)
 	}
 
-	ui.Success(fmt.Sprintf(
+	// Remove the tpm directory — it is no longer needed now that muxforge
+	// handles both plugin management and loading.
+	tpmRemoved := false
+	home, _ := os.UserHomeDir()
+	tpmDir := filepath.Join(home, ".tmux", "plugins", "tpm")
+	if dirExists(tpmDir) {
+		if err := os.RemoveAll(tpmDir); err != nil {
+			ui.Warning(fmt.Sprintf("could not remove tpm directory: %v", err))
+		} else {
+			ui.Success("removed ~/.tmux/plugins/tpm — replaced by muxforge")
+			tpmRemoved = true
+		}
+	}
+
+	msg := fmt.Sprintf(
 		"migration complete — %d plugin(s) moved to managed block, %d installed, %d already on disk",
 		len(allPlugins), installed, skipped,
-	))
+	)
+	if tpmRemoved {
+		msg += ", tpm removed"
+	}
+	ui.Success(msg)
 	ui.Hint("reload tmux with: tmux source-file " + cfg.Path)
 
 	return nil
