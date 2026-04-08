@@ -14,10 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// tpmBootstrapPatterns lists all known TPM run-line variants to detect and remove.
+// tpmBootstrapPatterns lists known TPM run-line variants for exact matching.
+// isTpmBootstrap also performs a content-based fallback for other variants.
 var tpmBootstrapPatterns = []string{
 	"run '~/.tmux/plugins/tpm/tpm'",
 	`run "~/.tmux/plugins/tpm/tpm"`,
+	"run-shell '~/.tmux/plugins/tpm/tpm'",
+	`run-shell "~/.tmux/plugins/tpm/tpm"`,
 }
 
 func newMigrateCmd() *cobra.Command {
@@ -48,8 +51,21 @@ func runMigrate() error {
 		os.Exit(1)
 	}
 
-	// Already migrated: managed block exists with plugins.
-	if cfg.ManagedBlockStart != -1 && len(cfg.ManagedPlugins) > 0 && len(cfg.LegacyPlugins) == 0 {
+	// Check whether any TPM bootstrap line is still present in the config.
+	// This can happen if a previous migrate attempt was incomplete, or if
+	// muxforge install created the managed block before migrate was run.
+	tpmLinePresent := false
+	for _, line := range cfg.Lines {
+		if isTpmBootstrap(strings.TrimSpace(line)) {
+			tpmLinePresent = true
+			break
+		}
+	}
+
+	// Already migrated: managed block with plugins, no legacy plugins, and no
+	// TPM remnants. If a TPM line is still present we fall through to clean it up.
+	if cfg.ManagedBlockStart != -1 && len(cfg.ManagedPlugins) > 0 &&
+		len(cfg.LegacyPlugins) == 0 && !tpmLinePresent {
 		ui.Info("already using muxforge — no migration needed")
 		return nil
 	}

@@ -579,6 +579,123 @@ func TestMigrate_LockPreservesExistingInstall(t *testing.T) {
 	}
 }
 
+// TestMigrate_AlreadyMigratedButTPMLinePresent verifies that migrate does NOT
+// early-exit when a managed block exists but the TPM bootstrap line is still
+// in the config. This happens when muxforge install created the managed block
+// before the user ran migrate, leaving the TPM run line in place.
+func TestMigrate_AlreadyMigratedButTPMLinePresent(t *testing.T) {
+	dir := t.TempDir()
+
+	// Simulate: managed block already exists (from a prior install), but the
+	// TPM bootstrap line was never removed.
+	confContent := "set -g mouse on\n" +
+		"\n" +
+		config.BlockStart + "\n" +
+		"set -g @plugin 'tmux-plugins/tmux-sensible'\n" +
+		config.BlockEnd + "\n" +
+		"\n" +
+		"run '~/.tmux/plugins/tpm/tpm'\n" +
+		config.BootstrapLine + "\n"
+	confPath := writeTmuxConfStr(t, dir, confContent)
+
+	cfg, err := config.ParseConfig(confPath)
+	if err != nil {
+		t.Fatalf("ParseConfig: %v", err)
+	}
+
+	// Confirm this is the "already migrated + TPM line present" scenario.
+	if cfg.ManagedBlockStart == -1 {
+		t.Fatal("expected managed block to exist")
+	}
+	if len(cfg.ManagedPlugins) == 0 {
+		t.Fatal("expected managed plugins")
+	}
+	if len(cfg.LegacyPlugins) != 0 {
+		t.Fatalf("expected no legacy plugins, got %v", cfg.LegacyPlugins)
+	}
+
+	// TPM line is present — migrate must NOT early-exit.
+	tpmPatterns := []string{
+		"run '~/.tmux/plugins/tpm/tpm'",
+		`run "~/.tmux/plugins/tpm/tpm"`,
+		"run-shell '~/.tmux/plugins/tpm/tpm'",
+		`run-shell "~/.tmux/plugins/tpm/tpm"`,
+	}
+	isTpm := func(line string) bool {
+		trimmed := strings.TrimSpace(line)
+		for _, pat := range tpmPatterns {
+			if trimmed == pat || strings.TrimRight(trimmed, " \t") == pat {
+				return true
+			}
+		}
+		return false
+	}
+	foundTPM := false
+	for _, line := range cfg.Lines {
+		if isTpm(line) {
+			foundTPM = true
+			break
+		}
+	}
+	if !foundTPM {
+		t.Fatal("test setup error: TPM bootstrap line not found in initial config")
+	}
+
+	// Simulate the migrate (TPM line must be stripped, managed block preserved).
+	allPlugins := []string{}
+	seen := make(map[string]bool)
+	for _, raw := range cfg.ManagedPlugins {
+		name := plugin.NormalizeName(raw)
+		if !seen[name] && name != "tmux-plugins/tpm" {
+			seen[name] = true
+			allPlugins = append(allPlugins, name)
+		}
+	}
+
+	newLines := buildMigratedLinesTest(cfg, allPlugins)
+	rewritten := strings.Join(newLines, "\n") + "\n"
+	if err := os.WriteFile(confPath, []byte(rewritten), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	// Verify the result.
+	newCfg, err := config.ParseConfig(confPath)
+	if err != nil {
+		t.Fatalf("ParseConfig after migrate: %v", err)
+	}
+
+	// TPM bootstrap line must be gone.
+	for _, line := range newCfg.Lines {
+		if strings.Contains(line, "tpm/tpm") {
+			t.Errorf("TPM bootstrap line should have been removed, found: %q", line)
+		}
+	}
+
+	// Managed block and plugin must still be present.
+	if newCfg.ManagedBlockStart == -1 {
+		t.Error("managed block should still exist after TPM-only cleanup")
+	}
+	if len(newCfg.ManagedPlugins) != 1 || newCfg.ManagedPlugins[0] != "tmux-plugins/tmux-sensible" {
+		t.Errorf("managed plugins wrong after cleanup: %v", newCfg.ManagedPlugins)
+	}
+
+	// muxforge bootstrap must be present.
+	if newCfg.BootstrapLineIndex == -1 {
+		t.Error("muxforge bootstrap line should be present")
+	}
+
+	// Custom settings must be preserved.
+	foundMouse := false
+	for _, line := range newCfg.Lines {
+		if line == "set -g mouse on" {
+			foundMouse = true
+		}
+	}
+	if !foundMouse {
+		t.Error("custom settings should be preserved")
+	}
+}
+
 // TestMigrate_NoPlugins verifies that migrate exits early when there are no
 // plugins (no managed block, no legacy declarations).
 func TestMigrate_NoPlugins(t *testing.T) {
