@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/TechAlchemistX/muxforge/internal/config"
 	"github.com/TechAlchemistX/muxforge/internal/plugin"
@@ -53,25 +54,37 @@ func runLoad() error {
 			continue
 		}
 
-		repoName := filepath.Base(p.InstallPath)
-		entryPoint := filepath.Join(p.InstallPath, repoName+".tmux")
-
-		info, err := os.Stat(entryPoint)
+		// Discover all *.tmux entry points in the plugin directory, matching
+		// how TPM finds plugin scripts rather than guessing the filename.
+		entries, err := os.ReadDir(p.InstallPath)
 		if err != nil {
-			// Entry point not found — plugin may not be installed yet.
+			// Plugin directory missing — may not be installed yet.
 			continue
 		}
 
-		// Ensure the entry point is executable (git clone preserves bits, but
-		// some file systems or copy operations may strip the execute bit).
-		if info.Mode()&0111 == 0 {
-			_ = os.Chmod(entryPoint, info.Mode()|0755)
-		}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".tmux") {
+				continue
+			}
 
-		execCmd := exec.Command(entryPoint)
-		execCmd.Env = append(os.Environ(), "TMUX_PLUGIN_MANAGER_PATH="+pluginsDir)
-		// Errors from individual plugins are non-fatal — continue loading others.
-		_ = execCmd.Run()
+			entryPoint := filepath.Join(p.InstallPath, entry.Name())
+
+			info, err := entry.Info()
+			if err != nil {
+				continue
+			}
+
+			// Ensure the entry point is executable (git clone preserves bits, but
+			// some file systems or copy operations may strip the execute bit).
+			if info.Mode()&0111 == 0 {
+				_ = os.Chmod(entryPoint, info.Mode()|0755)
+			}
+
+			execCmd := exec.Command(entryPoint)
+			execCmd.Env = append(os.Environ(), "TMUX_PLUGIN_MANAGER_PATH="+pluginsDir)
+			// Errors from individual plugins are non-fatal — continue loading others.
+			_ = execCmd.Run()
+		}
 	}
 
 	return nil

@@ -79,16 +79,18 @@ if [ -n "${CONFIG_PATH}" ]; then
   echo "-> Cleaning ${CONFIG_PATH}..."
 
   TMP_CONF="$(mktemp)"
-  # Remove the muxforge managed block (start marker through end marker inclusive),
-  # and both the current and legacy bootstrap lines.
+  # Remove only the muxforge block markers and bootstrap lines.
+  # Plugin declarations (set -g @plugin '...') are preserved so that
+  # another plugin manager can pick them up without re-configuration.
   sed \
-    -e '/^# --- muxforge plugins (managed) ---/,/^# --- end muxforge ---/d' \
+    -e '/^# --- muxforge plugins (managed) ---/d' \
+    -e '/^# --- end muxforge ---/d' \
     -e "/^run 'muxforge load'/d" \
     -e "/^run 'muxforge'/d" \
     "${CONFIG_PATH}" > "${TMP_CONF}"
   mv "${TMP_CONF}" "${CONFIG_PATH}"
 
-  echo "✓ Removed muxforge managed block and bootstrap line"
+  echo "✓ Removed muxforge markers and bootstrap line (plugin declarations preserved)"
 
   # Remove the lock file (lives in the same directory as tmux.conf).
   CONFIG_DIR="$(dirname "${CONFIG_PATH}")"
@@ -122,10 +124,18 @@ fi
 # ---------------------------------------------------------------------------
 # Step 3: Remove the binary
 # ---------------------------------------------------------------------------
-if [ -w "${BINARY_PATH}" ]; then
+BINARY_DIR="$(dirname "${BINARY_PATH}")"
+if [ -w "${BINARY_DIR}" ]; then
   rm "${BINARY_PATH}"
 else
+  echo "-> Elevated permissions required to remove ${BINARY_PATH}"
   sudo rm "${BINARY_PATH}"
+fi
+
+# Verify the binary was actually removed.
+if [ -f "${BINARY_PATH}" ] || command -v "${BINARY_NAME}" >/dev/null 2>&1; then
+  echo "! Warning: ${BINARY_NAME} may still be present — check ${BINARY_PATH} and your PATH" >&2
+  exit 1
 fi
 
 echo "✓ Removed ${BINARY_PATH}"
