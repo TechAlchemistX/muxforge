@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -53,6 +52,8 @@ func runSync(dryRun bool) error {
 		os.Exit(1)
 	}
 
+	pluginsDir := config.PluginsDir(cfgPath)
+
 	// Build lookup sets keyed by full name ("owner/repo") and by repo segment
 	// (the directory name). The plugins directory contains subdirectories named
 	// after the repo segment only, so we need both forms.
@@ -65,7 +66,7 @@ func runSync(dryRun bool) error {
 	}
 
 	// Scan the plugins directory for installed directory names (repo-name only).
-	installedDirNames, err := scanPluginsDir()
+	installedDirNames, err := scanPluginsDir(pluginsDir)
 	if err != nil {
 		// Non-fatal: plugins dir might not exist yet.
 		installedDirNames = []string{}
@@ -79,7 +80,7 @@ func runSync(dryRun bool) error {
 
 	// --- Step 1: For each declared plugin not installed → install it ---
 	for _, raw := range cfg.ManagedPlugins {
-		p, err := plugin.NewPlugin(raw)
+		p, err := plugin.NewPlugin(raw, pluginsDir)
 		if err != nil {
 			ui.Error(fmt.Sprintf("invalid plugin %q: %v", raw, err))
 			continue
@@ -171,7 +172,7 @@ func runSync(dryRun bool) error {
 			continue
 		}
 
-		p, err := plugin.NewPlugin(lp.Name)
+		p, err := plugin.NewPlugin(lp.Name, pluginsDir)
 		if err != nil {
 			continue
 		}
@@ -218,14 +219,8 @@ func runSync(dryRun bool) error {
 }
 
 // scanPluginsDir returns the repo-name segments of all subdirectories inside
-// ~/.tmux/plugins/ (top-level entries only).
-func scanPluginsDir() ([]string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("get home dir: %w", err)
-	}
-
-	pluginsDir := filepath.Join(home, ".tmux", "plugins")
+// the plugins directory (top-level entries only).
+func scanPluginsDir(pluginsDir string) ([]string, error) {
 	entries, err := os.ReadDir(pluginsDir)
 	if err != nil {
 		return nil, fmt.Errorf("read plugins dir %q: %w", pluginsDir, err)

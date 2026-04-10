@@ -1,32 +1,33 @@
 package plugin
 
 import (
-	"strings"
 	"testing"
 )
 
 func TestNewPlugin(t *testing.T) {
+	pluginsDir := "/tmp/test-plugins"
+
 	tests := []struct {
-		name        string
-		raw         string
-		wantName    string
-		wantSource  string
-		wantSuffix  string // suffix of InstallPath
-		wantErr     bool
+		name       string
+		raw        string
+		wantName   string
+		wantSource string
+		wantPath   string
+		wantErr    bool
 	}{
 		{
 			name:       "shorthand owner/repo",
 			raw:        "tmux-plugins/tmux-sensible",
 			wantName:   "tmux-plugins/tmux-sensible",
 			wantSource: "https://github.com/tmux-plugins/tmux-sensible",
-			wantSuffix: "/.tmux/plugins/tmux-sensible",
+			wantPath:   "/tmp/test-plugins/tmux-sensible",
 		},
 		{
 			name:       "full https URL",
 			raw:        "https://github.com/tmux-plugins/tmux-resurrect",
 			wantName:   "tmux-plugins/tmux-resurrect",
 			wantSource: "https://github.com/tmux-plugins/tmux-resurrect",
-			wantSuffix: "/.tmux/plugins/tmux-resurrect",
+			wantPath:   "/tmp/test-plugins/tmux-resurrect",
 		},
 		{
 			name:    "invalid input",
@@ -37,7 +38,7 @@ func TestNewPlugin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := NewPlugin(tt.raw)
+			p, err := NewPlugin(tt.raw, pluginsDir)
 			if tt.wantErr {
 				if err == nil {
 					t.Error("expected error, got nil")
@@ -56,8 +57,8 @@ func TestNewPlugin(t *testing.T) {
 			if p.Source != tt.wantSource {
 				t.Errorf("Source: got %q, want %q", p.Source, tt.wantSource)
 			}
-			if !strings.HasSuffix(p.InstallPath, tt.wantSuffix) {
-				t.Errorf("InstallPath %q should end with %q", p.InstallPath, tt.wantSuffix)
+			if p.InstallPath != tt.wantPath {
+				t.Errorf("InstallPath: got %q, want %q", p.InstallPath, tt.wantPath)
 			}
 		})
 	}

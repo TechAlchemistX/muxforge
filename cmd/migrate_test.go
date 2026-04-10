@@ -78,6 +78,7 @@ func simulateMigrate(
 
 	// Build lock file.
 	lf := lock.NewLockFile()
+	pluginsDir := config.PluginsDir(cfg.Path)
 	for _, name := range allPlugins {
 		if dir, ok := installDirs[name]; ok && dirExistsTest(dir) {
 			// Already installed — record HEAD.
@@ -97,7 +98,7 @@ func simulateMigrate(
 			})
 		} else if src, ok := remoteSources[name]; ok {
 			// Clone from provided source.
-			destDir := filepath.Join(filepath.Dir(cfg.Path), "plugins", repoName(name))
+			destDir := filepath.Join(pluginsDir, repoName(name))
 			if err := plugin.Clone(src, destDir); err != nil {
 				t.Fatalf("Clone %s: %v", name, err)
 			}
@@ -143,17 +144,12 @@ func buildMigratedLinesTest(cfg *config.Config, allPlugins []string) []string {
 		}
 	}
 
-	// Remove TPM bootstrap.
-	tpmPatterns := []string{
-		"run '~/.tmux/plugins/tpm/tpm'",
-		`run "~/.tmux/plugins/tpm/tpm"`,
-	}
+	// Remove TPM bootstrap (content-based — matches any run/run-shell with tpm/tpm).
 	for i, line := range cfg.Lines {
-		trimmed := strings.TrimSpace(line)
-		for _, pat := range tpmPatterns {
-			if trimmed == pat {
-				removeSet[i] = true
-			}
+		trimmed := strings.TrimRight(strings.TrimSpace(line), " \t")
+		if (strings.HasPrefix(trimmed, "run ") || strings.HasPrefix(trimmed, "run-shell ")) &&
+			strings.Contains(trimmed, "tpm/tpm") {
+			removeSet[i] = true
 		}
 	}
 
@@ -615,18 +611,11 @@ func TestMigrate_AlreadyMigratedButTPMLinePresent(t *testing.T) {
 	}
 
 	// TPM line is present — migrate must NOT early-exit.
-	tpmPatterns := []string{
-		"run '~/.tmux/plugins/tpm/tpm'",
-		`run "~/.tmux/plugins/tpm/tpm"`,
-		"run-shell '~/.tmux/plugins/tpm/tpm'",
-		`run-shell "~/.tmux/plugins/tpm/tpm"`,
-	}
 	isTpm := func(line string) bool {
-		trimmed := strings.TrimSpace(line)
-		for _, pat := range tpmPatterns {
-			if trimmed == pat || strings.TrimRight(trimmed, " \t") == pat {
-				return true
-			}
+		trimmed := strings.TrimRight(strings.TrimSpace(line), " \t")
+		if (strings.HasPrefix(trimmed, "run ") || strings.HasPrefix(trimmed, "run-shell ")) &&
+			strings.Contains(trimmed, "tpm/tpm") {
+			return true
 		}
 		return false
 	}
@@ -730,25 +719,37 @@ func TestMigrate_TPMBootstrapVariants(t *testing.T) {
 		"run '~/.tmux/plugins/tpm/tpm'",
 		`run "~/.tmux/plugins/tpm/tpm"`,
 		"run '~/.tmux/plugins/tpm/tpm'  ", // trailing spaces
+		"run '~/.config/tmux/plugins/tpm/tpm'",
+		`run "~/.config/tmux/plugins/tpm/tpm"`,
+		"run-shell '~/.tmux/plugins/tpm/tpm'",
+		`run-shell "~/.tmux/plugins/tpm/tpm"`,
+		"run-shell '~/.config/tmux/plugins/tpm/tpm'",
+		`run "$HOME/.tmux/plugins/tpm/tpm"`,      // content-based fallback
+		"run '#{HOME}/.tmux/plugins/tpm/tpm'",    // content-based fallback
 	}
 
+	// Mirror the production isTpmBootstrap logic.
 	tpmPatterns := []string{
 		"run '~/.tmux/plugins/tpm/tpm'",
 		`run "~/.tmux/plugins/tpm/tpm"`,
+		"run-shell '~/.tmux/plugins/tpm/tpm'",
+		`run-shell "~/.tmux/plugins/tpm/tpm"`,
+		"run '~/.config/tmux/plugins/tpm/tpm'",
+		`run "~/.config/tmux/plugins/tpm/tpm"`,
+		"run-shell '~/.config/tmux/plugins/tpm/tpm'",
+		`run-shell "~/.config/tmux/plugins/tpm/tpm"`,
 	}
 
 	isTpm := func(line string) bool {
-		trimmed := strings.TrimSpace(line)
+		trimmed := strings.TrimRight(strings.TrimSpace(line), " \t")
 		for _, pat := range tpmPatterns {
 			if trimmed == pat {
 				return true
 			}
 		}
-		trimmedFurther := strings.TrimRight(trimmed, " \t")
-		for _, pat := range tpmPatterns {
-			if trimmedFurther == pat {
-				return true
-			}
+		if (strings.HasPrefix(trimmed, "run ") || strings.HasPrefix(trimmed, "run-shell ")) &&
+			strings.Contains(trimmed, "tpm/tpm") {
+			return true
 		}
 		return false
 	}

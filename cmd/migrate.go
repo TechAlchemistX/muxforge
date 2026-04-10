@@ -15,12 +15,19 @@ import (
 )
 
 // tpmBootstrapPatterns lists known TPM run-line variants for exact matching.
-// isTpmBootstrap also performs a content-based fallback for other variants.
+// isTpmBootstrap also performs a content-based fallback for other variants
+// (e.g. XDG paths, $HOME expansions, etc.).
 var tpmBootstrapPatterns = []string{
+	// Legacy ~/.tmux/ path variants.
 	"run '~/.tmux/plugins/tpm/tpm'",
 	`run "~/.tmux/plugins/tpm/tpm"`,
 	"run-shell '~/.tmux/plugins/tpm/tpm'",
 	`run-shell "~/.tmux/plugins/tpm/tpm"`,
+	// XDG path variants.
+	"run '~/.config/tmux/plugins/tpm/tpm'",
+	`run "~/.config/tmux/plugins/tpm/tpm"`,
+	"run-shell '~/.config/tmux/plugins/tpm/tpm'",
+	`run-shell "~/.config/tmux/plugins/tpm/tpm"`,
 }
 
 func newMigrateCmd() *cobra.Command {
@@ -136,9 +143,10 @@ func runMigrate() error {
 	lf := lock.NewLockFile()
 	installed := 0
 	skipped := 0
+	pluginsDir := config.PluginsDir(cfgPath)
 
 	for _, name := range allPlugins {
-		p, err := plugin.NewPlugin(name)
+		p, err := plugin.NewPlugin(name, pluginsDir)
 		if err != nil {
 			ui.Warning(fmt.Sprintf("skipping invalid plugin %q: %v", name, err))
 			continue
@@ -192,13 +200,12 @@ func runMigrate() error {
 	// Remove the tpm directory — it is no longer needed now that muxforge
 	// handles both plugin management and loading.
 	tpmRemoved := false
-	home, _ := os.UserHomeDir()
-	tpmDir := filepath.Join(home, ".tmux", "plugins", "tpm")
+	tpmDir := filepath.Join(pluginsDir, "tpm")
 	if dirExists(tpmDir) {
 		if err := os.RemoveAll(tpmDir); err != nil {
 			ui.Warning(fmt.Sprintf("could not remove tpm directory: %v", err))
 		} else {
-			ui.Success("removed ~/.tmux/plugins/tpm — replaced by muxforge")
+			ui.Success(fmt.Sprintf("removed %s — replaced by muxforge", tpmDir))
 			tpmRemoved = true
 		}
 	}
@@ -313,18 +320,24 @@ func buildManagedBlockLines(plugins []string) []string {
 }
 
 // isTpmBootstrap reports whether a (trimmed) config line is a TPM run line.
+// It checks known patterns first, then falls back to content-based detection
+// for path variants we haven't explicitly listed (e.g. $HOME, #{...}).
 func isTpmBootstrap(trimmed string) bool {
-	for _, pat := range tpmBootstrapPatterns {
-		if trimmed == pat {
-			return true
-		}
-	}
-	// Also handle trailing spaces after closing quote/bracket variants.
+	// Strip trailing whitespace for comparison.
 	trimmedFurther := strings.TrimRight(trimmed, " \t")
+
 	for _, pat := range tpmBootstrapPatterns {
 		if trimmedFurther == pat {
 			return true
 		}
 	}
+
+	// Content-based fallback: any run or run-shell line that references
+	// tpm/tpm is almost certainly the TPM bootstrap.
+	if (strings.HasPrefix(trimmedFurther, "run ") || strings.HasPrefix(trimmedFurther, "run-shell ")) &&
+		strings.Contains(trimmedFurther, "tpm/tpm") {
+		return true
+	}
+
 	return false
 }

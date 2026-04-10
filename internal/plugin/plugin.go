@@ -22,9 +22,10 @@ type Plugin struct {
 }
 
 // NewPlugin constructs a Plugin from the raw declaration string, resolving
-// the source URL and install path. Returns an error if the source cannot
-// be resolved.
-func NewPlugin(raw string) (*Plugin, error) {
+// the source URL and install path. pluginsDir is the directory where plugins
+// are stored (use config.PluginsDir to derive it from the config path).
+// Returns an error if the source cannot be resolved.
+func NewPlugin(raw, pluginsDir string) (*Plugin, error) {
 	source, err := ResolveSource(raw)
 	if err != nil {
 		return nil, fmt.Errorf("new plugin %q: %w", raw, err)
@@ -34,7 +35,7 @@ func NewPlugin(raw string) (*Plugin, error) {
 		Raw:         raw,
 		Name:        NormalizeName(raw),
 		Source:      source,
-		InstallPath: InstallPath(raw),
+		InstallPath: InstallPath(raw, pluginsDir),
 	}, nil
 }
 

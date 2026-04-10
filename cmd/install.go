@@ -60,6 +60,8 @@ func runInstallAll(dryRun bool) error {
 		return nil
 	}
 
+	pluginsDir := config.PluginsDir(cfgPath)
+
 	// Collect results before writing the lock file. On any network failure
 	// we abort and write nothing.
 	type result struct {
@@ -72,7 +74,7 @@ func runInstallAll(dryRun bool) error {
 	skipped := 0
 
 	for _, raw := range cfg.ManagedPlugins {
-		p, err := plugin.NewPlugin(raw)
+		p, err := plugin.NewPlugin(raw, pluginsDir)
 		if err != nil {
 			ui.Error(fmt.Sprintf("invalid plugin %q: %v", raw, err))
 			os.Exit(1)
@@ -211,17 +213,6 @@ func runInstallAll(dryRun bool) error {
 // runInstallOne installs a single plugin by name, adding it to the managed
 // block if it is not already present.
 func runInstallOne(raw string, dryRun bool) error {
-	// Validate and resolve the argument.
-	p, err := plugin.NewPlugin(raw)
-	if err != nil {
-		ui.PrintError(
-			fmt.Sprintf("invalid plugin %q", raw),
-			err.Error(),
-			"use 'owner/repo' or a full HTTPS URL",
-		)
-		os.Exit(1)
-	}
-
 	cfgPath, err := config.FindConfig()
 	if err != nil {
 		ui.PrintError("no tmux config found", err.Error(), "create a tmux.conf and re-run 'muxforge install'")
@@ -231,6 +222,19 @@ func runInstallOne(raw string, dryRun bool) error {
 	cfg, err := config.ParseConfig(cfgPath)
 	if err != nil {
 		ui.PrintError("failed to parse config", err.Error(), "check that your tmux.conf is valid")
+		os.Exit(1)
+	}
+
+	pluginsDir := config.PluginsDir(cfgPath)
+
+	// Validate and resolve the argument.
+	p, err := plugin.NewPlugin(raw, pluginsDir)
+	if err != nil {
+		ui.PrintError(
+			fmt.Sprintf("invalid plugin %q", raw),
+			err.Error(),
+			"use 'owner/repo' or a full HTTPS URL",
+		)
 		os.Exit(1)
 	}
 

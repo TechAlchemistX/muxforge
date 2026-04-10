@@ -61,6 +61,8 @@ func runUpdateAll(dryRun bool) error {
 		return nil
 	}
 
+	pluginsDir := config.PluginsDir(cfgPath)
+
 	updatedLF := lock.NewLockFile()
 	// Preserve any lock entries that are not in the managed block.
 	for _, lp := range lf.Plugins {
@@ -68,7 +70,7 @@ func runUpdateAll(dryRun bool) error {
 	}
 
 	for _, raw := range cfg.ManagedPlugins {
-		p, err := plugin.NewPlugin(raw)
+		p, err := plugin.NewPlugin(raw, pluginsDir)
 		if err != nil {
 			ui.Error(fmt.Sprintf("invalid plugin %q: %v", raw, err))
 			continue
@@ -99,16 +101,6 @@ func runUpdateAll(dryRun bool) error {
 
 // runUpdateOne pulls the latest changes for a single named plugin.
 func runUpdateOne(raw string, dryRun bool) error {
-	p, err := plugin.NewPlugin(raw)
-	if err != nil {
-		ui.PrintError(
-			fmt.Sprintf("invalid plugin %q", raw),
-			err.Error(),
-			"use 'owner/repo' or a full HTTPS URL",
-		)
-		os.Exit(1)
-	}
-
 	cfgPath, err := config.FindConfig()
 	if err != nil {
 		ui.PrintError("no tmux config found", err.Error(), "create a tmux.conf and re-run 'muxforge update'")
@@ -118,6 +110,18 @@ func runUpdateOne(raw string, dryRun bool) error {
 	cfg, err := config.ParseConfig(cfgPath)
 	if err != nil {
 		ui.PrintError("failed to parse config", err.Error(), "check that your tmux.conf is valid")
+		os.Exit(1)
+	}
+
+	pluginsDir := config.PluginsDir(cfgPath)
+
+	p, err := plugin.NewPlugin(raw, pluginsDir)
+	if err != nil {
+		ui.PrintError(
+			fmt.Sprintf("invalid plugin %q", raw),
+			err.Error(),
+			"use 'owner/repo' or a full HTTPS URL",
+		)
 		os.Exit(1)
 	}
 

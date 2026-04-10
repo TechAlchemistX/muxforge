@@ -50,6 +50,8 @@ func runList() error {
 		return nil
 	}
 
+	pluginsDir := config.PluginsDir(cfgPath)
+
 	// Resolve each declared plugin and collect display rows.
 	type row struct {
 		name   string
@@ -69,7 +71,7 @@ func runList() error {
 	maxName := 0
 
 	for _, raw := range cfg.ManagedPlugins {
-		p, err := plugin.NewPlugin(raw)
+		p, err := plugin.NewPlugin(raw, pluginsDir)
 		if err != nil {
 			// Best-effort: show the raw name with an error status.
 			r := row{

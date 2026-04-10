@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -36,14 +35,13 @@ func ResolveSource(raw string) (string, error) {
 	)
 }
 
-// InstallPath returns the local installation path for a plugin.
-// The path is always ~/.tmux/plugins/<repo-name>.
-func InstallPath(raw string) string {
+// InstallPath returns the local installation path for a plugin within the
+// given plugins directory. The result is pluginsDir/<repo-name>.
+func InstallPath(raw, pluginsDir string) string {
 	raw = strings.TrimSpace(raw)
 	parts := strings.Split(raw, "/")
 	repoName := parts[len(parts)-1]
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".tmux", "plugins", repoName)
+	return filepath.Join(pluginsDir, repoName)
 }
 
 // NormalizeName converts any supported input form to the canonical

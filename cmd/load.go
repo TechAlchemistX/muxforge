@@ -44,12 +44,11 @@ func runLoad() error {
 		return nil
 	}
 
-	home, _ := os.UserHomeDir()
 	// TMUX_PLUGIN_MANAGER_PATH is expected by many plugins to locate their own scripts.
-	pluginsDir := filepath.Join(home, ".tmux", "plugins") + string(filepath.Separator)
+	pluginsDir := config.PluginsDir(cfgPath)
 
 	for _, raw := range cfg.ManagedPlugins {
-		p, err := plugin.NewPlugin(raw)
+		p, err := plugin.NewPlugin(raw, pluginsDir)
 		if err != nil {
 			continue
 		}
@@ -81,7 +80,7 @@ func runLoad() error {
 			}
 
 			execCmd := exec.Command(entryPoint)
-			execCmd.Env = append(os.Environ(), "TMUX_PLUGIN_MANAGER_PATH="+pluginsDir)
+			execCmd.Env = append(os.Environ(), "TMUX_PLUGIN_MANAGER_PATH="+pluginsDir+string(filepath.Separator))
 			// Errors from individual plugins are non-fatal — continue loading others.
 			_ = execCmd.Run()
 		}

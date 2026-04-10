@@ -98,8 +98,9 @@ func runRemove(arg string, dryRun bool) error {
 		os.Exit(1)
 	}
 
+	pluginsDir := config.PluginsDir(cfgPath)
 	target := matches[0]
-	p, err := plugin.NewPlugin(target)
+	p, err := plugin.NewPlugin(target, pluginsDir)
 	if err != nil {
 		ui.Error(fmt.Sprintf("invalid plugin %q: %v", target, err))
 		os.Exit(1)

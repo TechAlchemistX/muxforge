@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"strings"
 	"testing"
 )
 
@@ -70,19 +69,20 @@ func TestResolveSource(t *testing.T) {
 
 func TestInstallPath(t *testing.T) {
 	tests := []struct {
-		input    string
-		wantSuffix string
+		input      string
+		pluginsDir string
+		want       string
 	}{
-		{"tmux-plugins/tmux-sensible", "/.tmux/plugins/tmux-sensible"},
-		{"https://github.com/tmux-plugins/tmux-sensible", "/.tmux/plugins/tmux-sensible"},
-		{"owner/myrepo", "/.tmux/plugins/myrepo"},
+		{"tmux-plugins/tmux-sensible", "/home/user/.tmux/plugins", "/home/user/.tmux/plugins/tmux-sensible"},
+		{"https://github.com/tmux-plugins/tmux-sensible", "/home/user/.config/tmux/plugins", "/home/user/.config/tmux/plugins/tmux-sensible"},
+		{"owner/myrepo", "/home/user/.tmux/plugins", "/home/user/.tmux/plugins/myrepo"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			got := InstallPath(tt.input)
-			if !strings.HasSuffix(got, tt.wantSuffix) {
-				t.Errorf("InstallPath(%q) = %q, want suffix %q", tt.input, got, tt.wantSuffix)
+			got := InstallPath(tt.input, tt.pluginsDir)
+			if got != tt.want {
+				t.Errorf("InstallPath(%q, %q) = %q, want %q", tt.input, tt.pluginsDir, got, tt.want)
 			}
 		})
 	}

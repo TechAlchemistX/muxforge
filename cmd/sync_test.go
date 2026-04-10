@@ -49,7 +49,7 @@ func TestSync_MissingPluginInstalled(t *testing.T) {
 	}
 
 	// Simulate sync: clone the missing plugin.
-	p, err := plugin.NewPlugin("tmux-plugins/tmux-sensible")
+	p, err := plugin.NewPlugin("tmux-plugins/tmux-sensible", config.PluginsDir(confPath))
 	if err != nil {
 		t.Fatalf("NewPlugin: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestSync_LockEntryMissingDirectory_Reinstalls(t *testing.T) {
 			continue
 		}
 
-		p, err := plugin.NewPlugin(lp.Name)
+		p, err := plugin.NewPlugin(lp.Name, config.PluginsDir(confPath))
 		if err != nil {
 			t.Fatalf("NewPlugin: %v", err)
 		}
@@ -354,7 +354,7 @@ func TestSync_AlreadyInstalled_AddedToLock(t *testing.T) {
 		if err != nil {
 			t.Fatalf("HeadCommit: %v", err)
 		}
-		p, _ := plugin.NewPlugin(raw)
+		p, _ := plugin.NewPlugin(raw, config.PluginsDir(confPath))
 		readLF.Plugins = append(readLF.Plugins, lock.LockedPlugin{
 			Name:        name,
 			Source:      p.Source,

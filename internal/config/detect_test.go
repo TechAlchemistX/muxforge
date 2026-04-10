@@ -114,6 +114,43 @@ func TestFindConfig(t *testing.T) {
 	})
 }
 
+// TestPluginsDir verifies that the plugins directory is derived correctly
+// from the config path.
+func TestPluginsDir(t *testing.T) {
+	home := homeDir()
+
+	tests := []struct {
+		name       string
+		configPath string
+		want       string
+	}{
+		{
+			name:       "legacy ~/.tmux.conf",
+			configPath: filepath.Join(home, ".tmux.conf"),
+			want:       filepath.Join(home, ".tmux", "plugins"),
+		},
+		{
+			name:       "XDG ~/.config/tmux/tmux.conf",
+			configPath: filepath.Join(home, ".config", "tmux", "tmux.conf"),
+			want:       filepath.Join(home, ".config", "tmux", "plugins"),
+		},
+		{
+			name:       "custom path /etc/tmux/tmux.conf",
+			configPath: "/etc/tmux/tmux.conf",
+			want:       "/etc/tmux/plugins",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := PluginsDir(tt.configPath)
+			if got != tt.want {
+				t.Errorf("PluginsDir(%q) = %q, want %q", tt.configPath, got, tt.want)
+			}
+		})
+	}
+}
+
 // TestFindConfigPrecedence verifies that TMUX_CONFIG takes precedence over XDG.
 func TestFindConfigPrecedence(t *testing.T) {
 	dir := t.TempDir()

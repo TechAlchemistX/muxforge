@@ -66,6 +66,23 @@ func fileExists(path string) bool {
 	return info.Mode().IsRegular()
 }
 
+// PluginsDir returns the directory where plugins should be installed,
+// derived from the config file path. The convention mirrors tmux/TPM:
+//   - ~/.tmux.conf         → ~/.tmux/plugins/
+//   - ~/.config/tmux/tmux.conf → ~/.config/tmux/plugins/
+//
+// In general, if the config lives directly in $HOME, plugins go in
+// ~/.tmux/plugins/; otherwise they go in a "plugins" subdirectory
+// alongside the config file.
+func PluginsDir(configPath string) string {
+	dir := filepath.Dir(configPath)
+	home := homeDir()
+	if dir == home {
+		return filepath.Join(home, ".tmux", "plugins")
+	}
+	return filepath.Join(dir, "plugins")
+}
+
 // lockPathFor derives the lock file path from a config file path.
 // The lock file lives in the same directory as the config, with the
 // extension changed from .conf to .lock.
