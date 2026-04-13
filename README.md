@@ -1,17 +1,20 @@
-# muxforge
+<h1 align="center">muxforge</h1>
 
-**Reproducible tmux plugin management for engineers who live on servers.**
+<p align="center"><strong>Reproducible tmux plugin management for engineers who live on servers.</strong></p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/TechAlchemistX/muxforge/ci.yml?style=flat&label=CI&logo=github)](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/TechAlchemistX/muxforge?style=flat&logo=github&label=release)](https://github.com/TechAlchemistX/muxforge/releases)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/TechAlchemistX/muxforge?style=flat&logo=go&label=go)](https://go.dev/)
-[![License](https://img.shields.io/github/license/TechAlchemistX/muxforge?style=flat)](./LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue?style=flat)](https://github.com/TechAlchemistX/muxforge/releases)
+<p align="center">
+  <a href="https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/TechAlchemistX/muxforge/ci.yml?style=flat&label=CI&logo=github" alt="CI"></a>
+  <a href="https://github.com/TechAlchemistX/muxforge/releases"><img src="https://img.shields.io/github/v/release/TechAlchemistX/muxforge?style=flat&logo=github&label=release" alt="Release"></a>
+  <a href="https://go.dev/"><img src="https://img.shields.io/github/go-mod/go-version/TechAlchemistX/muxforge?style=flat&logo=go&label=go" alt="Go Version"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/TechAlchemistX/muxforge?style=flat" alt="License"></a>
+  <a href="https://github.com/TechAlchemistX/muxforge/releases"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue?style=flat" alt="Platform"></a>
+</p>
 
 TPM still works. But it has no memory, no lock file, and no concept of reproducibility. muxforge does.
 
 ```bash
-curl -fsSL https://muxforge.dev/install.sh | sh && muxforge install
+curl -fsSL https://muxforge.dev/install.sh | sh
+muxforge install
 ```
 
 ---
