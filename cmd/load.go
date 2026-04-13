@@ -13,8 +13,9 @@ import (
 
 func newLoadCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "load",
-		Short: "Source all managed plugins into the current tmux session",
+		Use:     "load",
+		GroupID: "setup-commands",
+		Short:   "Source all managed plugins into the current tmux session",
 		Long: `Load is called automatically by tmux at startup via the bootstrap line:
 
     run 'muxforge load'

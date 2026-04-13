@@ -17,8 +17,9 @@ func newRemoveCmd() *cobra.Command {
 	var dryRun bool
 
 	cmd := &cobra.Command{
-		Use:   "remove <plugin>",
-		Short: "Remove a plugin from config, lock file, and disk",
+		Use:     "remove <plugin>",
+		GroupID: "plugin-commands",
+		Short:   "Remove a plugin from config, lock file, and disk",
 		Long: `Remove a plugin by name (owner/repo or repo name only).
 The plugin declaration is removed from the managed block, its directory
 is deleted, and the lock file entry is removed.`,

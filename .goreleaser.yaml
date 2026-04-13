@@ -45,3 +45,9 @@ brews:
       bin.install "muxforge"
     test: |
       assert_match /muxforge v/, shell_output("#{bin}/muxforge --version")
+    caveats: |
+      To clean up tmux.conf before uninstalling, run:
+        muxforge purge
+
+      To also remove all plugin directories:
+        muxforge purge --purge-plugins

@@ -40,6 +40,12 @@ and pins versions via a tmux.lock file for reproducible setups.`,
 
 	root.Flags().BoolVarP(&showVersion, "version", "v", false, "Print version information")
 
+	root.AddGroup(
+		&cobra.Group{ID: "plugin-commands", Title: "Plugin Commands:"},
+		&cobra.Group{ID: "setup-commands", Title: "Setup Commands:"},
+		&cobra.Group{ID: "maintenance-commands", Title: "Maintenance Commands:"},
+	)
+
 	root.AddCommand(newInstallCmd())
 	root.AddCommand(newRemoveCmd())
 	root.AddCommand(newUpdateCmd())
@@ -47,6 +53,7 @@ and pins versions via a tmux.lock file for reproducible setups.`,
 	root.AddCommand(newSyncCmd())
 	root.AddCommand(newMigrateCmd())
 	root.AddCommand(newLoadCmd())
+	root.AddCommand(newPurgeCmd())
 
 	return root
 }

@@ -32,8 +32,9 @@ var tpmBootstrapPatterns = []string{
 
 func newMigrateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "migrate",
-		Short: "Migrate an existing TPM setup to muxforge",
+		Use:     "migrate",
+		GroupID: "setup-commands",
+		Short:   "Migrate an existing TPM setup to muxforge",
 		Long: `Migrate converts a TPM-style tmux.conf to muxforge management.
 It moves all @plugin declarations into the muxforge managed block, replaces
 the TPM bootstrap line with the muxforge bootstrap line, and creates a

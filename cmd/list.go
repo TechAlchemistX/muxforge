@@ -14,8 +14,9 @@ import (
 
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List all managed plugins and their status",
+		Use:     "list",
+		GroupID: "plugin-commands",
+		Short:   "List all managed plugins and their status",
 		Long: `Display a formatted table of all declared plugins with their install
 status and lock file information.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

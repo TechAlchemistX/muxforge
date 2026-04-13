@@ -16,8 +16,9 @@ func newInstallCmd() *cobra.Command {
 	var dryRun bool
 
 	cmd := &cobra.Command{
-		Use:   "install [plugin]",
-		Short: "Install plugins from config or add a new plugin",
+		Use:     "install [plugin]",
+		GroupID: "plugin-commands",
+		Short:   "Install plugins from config or add a new plugin",
 		Long: `Install all plugins declared in the managed block, or add and install
 a single plugin by specifying its name (owner/repo or full HTTPS URL).`,
 		RunE: func(cmd *cobra.Command, args []string) error {

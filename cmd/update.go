@@ -16,8 +16,9 @@ func newUpdateCmd() *cobra.Command {
 	var dryRun bool
 
 	cmd := &cobra.Command{
-		Use:   "update [plugin]",
-		Short: "Update all plugins or a single plugin to their latest version",
+		Use:     "update [plugin]",
+		GroupID: "plugin-commands",
+		Short:   "Update all plugins or a single plugin to their latest version",
 		Long: `Pull the latest changes for all managed plugins, or for a single
 plugin if specified. Updates the lock file with new commit hashes.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
