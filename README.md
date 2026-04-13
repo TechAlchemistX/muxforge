@@ -2,8 +2,11 @@
 
 **Reproducible tmux plugin management for engineers who live on servers.**
 
-[![CI](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml/badge.svg)](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml)
-[![Release](https://github.com/TechAlchemistX/muxforge/actions/workflows/release.yml/badge.svg)](https://github.com/TechAlchemistX/muxforge/actions/workflows/release.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/TechAlchemistX/muxforge/ci.yml?style=flat&label=CI&logo=github)](https://github.com/TechAlchemistX/muxforge/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/TechAlchemistX/muxforge?style=flat&logo=github&label=release)](https://github.com/TechAlchemistX/muxforge/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/TechAlchemistX/muxforge?style=flat&logo=go&label=go)](https://go.dev/)
+[![License](https://img.shields.io/github/license/TechAlchemistX/muxforge?style=flat)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue?style=flat)](https://github.com/TechAlchemistX/muxforge/releases)
 
 TPM still works. But it has no memory, no lock file, and no concept of reproducibility. muxforge does.
 
@@ -55,15 +58,22 @@ Download the binary for your platform from [releases](https://github.com/TechAlc
 curl -fsSL https://muxforge.dev/uninstall.sh | sh
 ```
 
-**Homebrew**
+**Homebrew** (2 steps — purge config, then remove binary)
 ```bash
+muxforge purge
 brew uninstall muxforge
 ```
 
-The uninstaller removes the binary, strips the muxforge managed block and bootstrap line from your `tmux.conf`, and deletes the lock file. Plugin directories in `~/.tmux/plugins/` are left in place by default — pass `--purge-plugins` to remove them too:
+The `muxforge purge` command removes the managed block markers, bootstrap line, and lock file from your `tmux.conf` while preserving your `@plugin` declarations so another plugin manager can pick them up. The `curl` uninstaller does the same cleanup plus removing the binary.
+
+Plugin directories in the plugins folder are kept by default. Pass `--purge-plugins` to remove them too:
 
 ```bash
+# curl
 curl -fsSL https://muxforge.dev/uninstall.sh | sh -s -- --purge-plugins
+
+# brew
+muxforge purge --purge-plugins
 ```
 
 ---
@@ -74,8 +84,10 @@ curl -fsSL https://muxforge.dev/uninstall.sh | sh -s -- --purge-plugins
 
 ```bash
 # 1. Get your tmux.conf in place (copy from dotfiles, scp, curl from a gist)
-# 2. Run the one-liner
-curl -fsSL https://muxforge.dev/install.sh | sh && muxforge install
+# 2. Install muxforge
+curl -fsSL https://muxforge.dev/install.sh | sh
+# 3. Install your plugins
+muxforge install
 ```
 
 muxforge will:
@@ -101,7 +113,9 @@ Everything inside the managed block is muxforge's territory. Everything outside 
 
 ---
 
-## Core Commands
+## Commands
+
+### Plugin Commands
 
 | Command | What it does |
 |---|---|
@@ -112,7 +126,22 @@ Everything inside the managed block is muxforge's territory. Everything outside 
 | `muxforge update <plugin>` | Update specific plugin, update lock file |
 | `muxforge list` | Show installed plugins and their pinned versions |
 | `muxforge sync` | Reconcile config, installed plugins, and lock file |
-| `muxforge migrate` | Migrate from TPM |
+
+### Setup Commands
+
+| Command | What it does |
+|---|---|
+| `muxforge migrate` | Migrate from TPM in one step |
+| `muxforge load` | Source managed plugins into the current tmux session (called by the bootstrap line) |
+
+### Maintenance Commands
+
+| Command | What it does |
+|---|---|
+| `muxforge purge` | Remove muxforge markers, bootstrap line, and lock file from tmux.conf |
+| `muxforge purge --purge-plugins` | Same as above, plus delete the plugins directory |
+
+All commands support `--help` for detailed usage. Commands that modify state also support `--dry-run`.
 
 ---
 
@@ -150,8 +179,11 @@ The installed plugins themselves (`~/.tmux/plugins/`) are derived from the lock 
 git clone https://github.com/you/dotfiles ~/dotfiles
 cd ~/dotfiles && stow tmux
 
-# Install muxforge and get exact plugin versions from lock file
-curl -fsSL https://muxforge.dev/install.sh | sh && muxforge install
+# Install muxforge
+curl -fsSL https://muxforge.dev/install.sh | sh
+
+# Get exact plugin versions from lock file
+muxforge install
 ```
 
 Same environment. Every machine. Every time.
