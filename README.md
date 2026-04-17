@@ -23,7 +23,7 @@ muxforge install
 
 TPM was built in 2013 for a different era of how engineers work. It installs plugins. That's it.
 
-muxforge manages your tmux environment — the same way Terraform manages infrastructure. Declare what you want. Get exactly that. Every time. On every machine.
+A tmux plugin manager with a lockfile. Install, remove, reproduce — same plugins, same versions, every machine.
 
 - **Lock file** — pins exact plugin versions so two machines set up a month apart are identical
 - **Single binary** — nothing to clone, nothing to source, nothing to break
